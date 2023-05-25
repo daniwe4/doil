@@ -221,6 +221,10 @@ class ImportCommand extends Command
             "mysql ilias < /var/ilias/data/ilias.sql"
         );
 
+        // TODO: if change root password
+        // execute
+        // docker-compose -f /home/dweise/Projects/instances/itest/docker-compose.yml exec itest bash -c "mysql ilias -e 'update usr_data set passwd = \"\$2y\$09\$uhSHx5YHS6G1zv0gdTZfx.VNK482euQm2HmPd6cBhmOn3lgPd.NSC\", passwd_salt = NULL, passwd_enc_type = \"bcryptphp\" where login = \"root\";'"
+
         $location = $this->filesystem->searchForFileRecursive($path . "/volumes/ilias/data", "/client\.ini\.php/");
 
         if (is_null($location)) {
