@@ -188,9 +188,14 @@ function doil_system_create_folder() {
   fi
 
   if [ ! -d /usr/local/share/doil/templates ]
-    then
-      mkdir /usr/local/share/doil/templates
-    fi
+  then
+    mkdir /usr/local/share/doil/templates
+  fi
+
+  if [ ! -d /usr/local/share/doil/http ]
+  then
+    mkdir /usr/local/share/doil/http
+  fi
 
   return 0
 }
@@ -200,6 +205,7 @@ function doil_system_copy_doil() {
   cp -r ${SCRIPT_DIR}/templates/mail /usr/local/lib/doil/server/
   cp -r ${SCRIPT_DIR}/templates/proxy /usr/local/lib/doil/server/
   cp -r ${SCRIPT_DIR}/templates/salt /usr/local/lib/doil/server/
+  cp -r ${SCRIPT_DIR}/templates/http /usr/local/lib/doil/server/
   cp -r ${SCRIPT_DIR}/templates/php /usr/local/lib/doil/server/
   cp -r ${SCRIPT_DIR}/templates/minion /usr/local/share/doil/templates
   cp -r ${SCRIPT_DIR}/templates/base /usr/local/share/doil/templates
@@ -262,6 +268,8 @@ function doil_system_setup_access() {
   chmod -R g+s /usr/local/share/doil/instances
   chmod -R g+w /usr/local/share/doil/repositories
   chmod -R g+s /usr/local/share/doil/repositories
+  chmod -R g+w /usr/local/share/doil/http
+  chmod -R g+s /usr/local/share/doil/http
   chmod +x /usr/local/bin/doil
   chmod -R 777 /var/log/doil/
 
@@ -361,4 +369,10 @@ function doil_system_install_mailserver() {
     docker exec -i doil_saltmain bash -c "salt \"doil.mail\" state.highstate saltenv=change-roundcube-password" 2>&1 > /var/log/doil/stream.log
   fi
   docker commit doil_mail doil_mail:stable 2>&1 > /var/log/doil/stream.log
+}
+
+function doil_system_install_httpserver() {
+  cd /usr/local/lib/doil/server/http
+  BUILD=$(docker-compose up -d 2>&1 > /var/log/doil/stream.log) 2>&1 > /var/log/doil/stream.log
+  docker commit doil_http doil_http:stable 2>&1 > /var/log/doil/stream.log
 }

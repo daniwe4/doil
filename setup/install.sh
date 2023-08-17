@@ -144,6 +144,11 @@ then
   doil_status_send_message "Installing mail server"
   doil_system_install_mailserver
   doil_status_okay
+
+  # start http server
+  doil_status_send_message "Installing http server"
+  doil_system_install_httpserver
+  doil_status_okay
 fi
 
 #################
