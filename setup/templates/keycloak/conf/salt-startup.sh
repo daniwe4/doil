@@ -7,3 +7,13 @@ if [ -f "/etc/salt/pki/minion/minion_master.pub" ]
 then
   rm /etc/salt/pki/minion/minion_master.pub
 fi
+
+while ! pgrep -f "mariadb" > /dev/null; do
+    sleep 1
+done
+
+if [ -f "/root/init.sql" ]
+then
+  mysql < /root/init.sql
+  rm /root/init.sql
+fi

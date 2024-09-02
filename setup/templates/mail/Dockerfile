@@ -12,6 +12,7 @@ RUN /opt/saltstack/salt/bin/python3 -m pip install --upgrade pip
 RUN /opt/saltstack/salt/bin/python3 -m pip install mysql
 
 RUN apt-get update && apt-get remove -y python3-dev default-libmysqlclient-dev build-essential pkg-config
+RUN mkdir /root/.keycloak
 
 COPY conf/run-supervisor.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/run-supervisor.sh

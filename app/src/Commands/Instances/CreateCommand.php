@@ -31,6 +31,7 @@ class CreateCommand extends Command
     protected const GLOBAL_REPO_PATH = "/usr/local/share/doil/repositories";
     protected const LOCAL_INSTANCES_PATH = "/.doil/instances";
     protected const GLOBAL_INSTANCES_PATH = "/usr/local/share/doil/instances";
+    protected const KEYCLOAK_PATH = "/usr/local/lib/doil/server/keycloak";
     protected const BASIC_FOLDERS = [
         "/conf",
         "/conf/salt",
@@ -109,6 +110,7 @@ class CreateCommand extends Command
         $instance_salt_name = $options["name"] . "." . $suffix;
         $user_name = $this->posix->getCurrentUserName();
         $home_dir = $this->posix->getHomeDirectory($this->posix->getUserId());
+        $keycloak = false;
 
         if ($this->filesystem->exists($instance_path)) {
             $this->writer->error(
@@ -125,6 +127,10 @@ class CreateCommand extends Command
                 "Folder $home_dir/.ssh not found."
             );
             return Command::FAILURE;
+        }
+
+        if ($this->filesystem->exists(self::KEYCLOAK_PATH)) {
+            $keycloak = true;
         }
 
         $this->writer->beginBlock($output, "Creating instance " . $options['name']);
@@ -286,11 +292,22 @@ class CreateCommand extends Command
         // set grains
         $this->writer->beginBlock($output, "Setting up instance configuration");
         $mysql_password = $this->generatePassword(16);
+
         $cron_password = "not-needed";
         if ($ilias_version < 9) {
             $cron_password = $this->generatePassword(16);
         }
+
+        if ($keycloak) {
+            $samlpass = $this->generatePassword(33);
+            $samlsalt = $this->generatePassword(33);
+            $this->docker->setGrain($instance_salt_name, "samlpass", "$samlpass");
+            $this->docker->setGrain($instance_salt_name, "samlsalt", "$samlsalt");
+            sleep(1);
+        }
+
         $host = explode("=", $this->filesystem->getLineInFile("/etc/doil/doil.conf", "host"));
+
         $this->docker->setGrain($instance_salt_name, "mpass", "$mysql_password");
         sleep(1);
         $this->docker->setGrain($instance_salt_name, "cpass", "$cron_password");
