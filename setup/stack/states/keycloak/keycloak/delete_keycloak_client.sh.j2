@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+/opt/keycloak-25.0.5/bin/kcadm.sh config credentials --server http://localhost:8080 --realm master --user admin --password {{ new_admin_password }}
+KEYCLOAK_CLIENT_ID=$(/opt/keycloak-25.0.5/bin/kcadm.sh get clients | jq ".[] | select(.clientId|test(\".*/doil/${1}/.*\")).id" | tr -d '"')
+/opt/keycloak-25.0.5/bin/kcadm.sh delete clients/${KEYCLOAK_CLIENT_ID}

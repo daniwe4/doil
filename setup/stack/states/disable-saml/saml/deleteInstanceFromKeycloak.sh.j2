@@ -1,0 +1,17 @@
+#!/bin/bash
+
+KC_HOST={{ server_host_name }}
+SP_HOST={{ doil_domain }}
+
+# get the keycloak rest-api auth token
+TOKEN_URL="${KC_HOST}/realms/master/protocol/openid-connect/token"
+AUTH="Authorization: bearer $(curl -s -d client_id=admin-cli -d username=admin -d password={{ admin_password }} -d grant_type=password "${TOKEN_URL}" | sed -E 's/.*"access_token":"?([^,"]*)"?.*/\1/')"
+
+CLIENTS_URL="${KC_HOST}/admin/realms/master/clients"
+CLIENT_UUID=$(curl -s -X GET -H "${AUTH}"  -H 'content-type: application/json' "${CLIENTS_URL}" | jq ".[] | select(.clientId|test(\"^${SP_HOST}/.*\")).id" | tr -d '"')
+if [ "${CLIENT_UUID}" == "" ]
+then
+  exit 0
+fi
+CLIENT_DELETE_URL="${KC_HOST}/admin/realms/master/clients/${CLIENT_UUID}"
+curl -s -X DELETE -H "${AUTH}"  -H 'content-type: application/json' "${CLIENT_DELETE_URL}"

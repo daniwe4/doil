@@ -31,12 +31,14 @@ class CreateCommand extends Command
     protected const GLOBAL_REPO_PATH = "/usr/local/share/doil/repositories";
     protected const LOCAL_INSTANCES_PATH = "/.doil/instances";
     protected const GLOBAL_INSTANCES_PATH = "/usr/local/share/doil/instances";
+    protected const KEYCLOAK_PATH = "/usr/local/lib/doil/server/keycloak";
     protected const BASIC_FOLDERS = [
         "/conf",
         "/conf/salt",
         "/volumes/db",
         "/volumes/index",
         "/volumes/data",
+        "/volumes/cert",
         "/volumes/logs/error",
         "/volumes/logs/apache",
         "/volumes/etc/apache2",
@@ -109,6 +111,7 @@ class CreateCommand extends Command
         $instance_salt_name = $options["name"] . "." . $suffix;
         $user_name = $this->posix->getCurrentUserName();
         $home_dir = $this->posix->getHomeDirectory($this->posix->getUserId());
+        $keycloak = false;
 
         if ($this->filesystem->exists($instance_path)) {
             $this->writer->error(
@@ -125,6 +128,10 @@ class CreateCommand extends Command
                 "Folder $home_dir/.ssh not found."
             );
             return Command::FAILURE;
+        }
+
+        if ($this->filesystem->exists(self::KEYCLOAK_PATH)) {
+            $keycloak = true;
         }
 
         $this->writer->beginBlock($output, "Creating instance " . $options['name']);
@@ -261,6 +268,7 @@ class CreateCommand extends Command
         $this->docker->runContainer($instance_name);
         $usr_id = (string) $this->posix->getUserId();
         $group_id = (string) $this->posix->getGroupId();
+        $this->docker->executeDockerCommand($instance_name, "mkdir -p /var/ilias/cert");
         $this->docker->executeDockerCommand($instance_name, "usermod -u $usr_id www-data");
         $this->docker->executeDockerCommand($instance_name, "groupmod -g $group_id www-data");
         $this->docker->executeDockerCommand($instance_name, "/etc/init.d/mariadb start");
@@ -286,11 +294,22 @@ class CreateCommand extends Command
         // set grains
         $this->writer->beginBlock($output, "Setting up instance configuration");
         $mysql_password = $this->generatePassword(16);
+
         $cron_password = "not-needed";
         if ($ilias_version < 9) {
             $cron_password = $this->generatePassword(16);
         }
+
+        if ($keycloak) {
+            $samlpass = $this->generatePassword(33);
+            $samlsalt = $this->generatePassword(33);
+            $this->docker->setGrain($instance_salt_name, "samlpass", "$samlpass");
+            $this->docker->setGrain($instance_salt_name, "samlsalt", "$samlsalt");
+            sleep(1);
+        }
+
         $host = explode("=", $this->filesystem->getLineInFile("/etc/doil/doil.conf", "host"));
+
         $this->docker->setGrain($instance_salt_name, "mpass", "$mysql_password");
         sleep(1);
         $this->docker->setGrain($instance_salt_name, "cpass", "$cron_password");
@@ -377,6 +396,20 @@ class CreateCommand extends Command
         $this->writer->beginBlock($output, "Apply enable-captainhook state");
         $this->docker->applyState($instance_salt_name, "enable-captainhook");
         $this->writer->endBlock();
+
+        if ($ilias_version >= 8.0) {
+            // apply prevent_super_global_replacement state
+            $this->writer->beginBlock($output, "Apply prevent_super_global_replacement state");
+            $this->docker->applyState($instance_salt_name, "prevent-super-global-replacement");
+            $this->writer->endBlock();
+        }
+
+        if ($keycloak) {
+            // apply enable-saml state
+            $this->writer->beginBlock($output, "Apply enable-saml state");
+            $this->docker->applyState($instance_salt_name, "enable-saml");
+            $this->writer->endBlock();
+        }
 
         // apply access state
         $this->writer->beginBlock($output, "Apply access state");

@@ -30,6 +30,7 @@ php7.3:
       - php7.3-opcache
       - php7.3-readline
       - php7.3-soap
+      - php7.3-sqlite3
       - php7.3-xml
       - php7.3-xmlrpc
       - php7.3-xsl
@@ -54,6 +55,7 @@ php{{ version }}:
           - php{{ version }}-opcache
           - php{{ version }}-readline
           - php{{ version }}-soap
+          - php{{ version }}-sqlite3
           - php{{ version }}-xml
           - php{{ version }}-xmlrpc
           - php{{ version }}-xsl

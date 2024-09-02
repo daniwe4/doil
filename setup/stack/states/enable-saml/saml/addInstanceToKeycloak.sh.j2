@@ -1,0 +1,30 @@
+#!/bin/bash
+
+KC_HOST={{ server_host_name }}
+SP_HOST={{ doil_domain }}
+
+# get the keycloak rest-api auth token
+TOKEN_URL="${KC_HOST}/realms/master/protocol/openid-connect/token"
+AUTH="Authorization: bearer $(curl -s -d client_id=admin-cli -d username=admin -d password={{ admin_password }} -d grant_type=password "${TOKEN_URL}" | sed -E 's/.*"access_token":"?([^,"]*)"?.*/\1/')"
+
+# add a client scope to keycloak if not exists
+CS_EXIST=$(curl -s -X GET -H "${AUTH}"  -H 'content-type: application/json' ${CS_URL} | jq '.[] | select(.name == "MapEmail")')
+if [ "${CS_EXIST}" != "" ]
+then
+  CS_JSON='{"name":"MapEmail","description":"","protocol":"saml","attributes":{"include.in.token.scope":"false","display.on.consent.screen":"true","gui.order":"","consent.screen.text":""},"protocolMappers":[{"name":"X500 email","protocol":"saml","protocolMapper":"saml-user-property-mapper","consentRequired":false,"config":{"attribute.nameformat":"Basic","user.attribute":"email","friendly.name":"email","attribute.name":"email"}}]}'
+  CS_URL="${KC_HOST}/admin/realms/master/client-scopes"
+  curl -s -X POST -H "${AUTH}"  -H 'content-type: application/json' ${CS_URL} -d "${CS_JSON}"
+fi
+
+# convert simpleSamlPhp xml metadata to json
+CONVERTER_URL="${KC_HOST}/admin/realms/master/client-description-converter"
+XML=$(curl -s "${SP_HOST}"/Services/Saml/lib/metadata.php?client_id=ilias)
+JSON=$(curl -s -X POST -H "${AUTH}"  -H 'content-type: application/json' "${CONVERTER_URL}" -d "${XML}")
+
+# add the client scope to json
+JSON=${JSON%?}',"defaultClientScopes":["MapEmail"]}'
+
+# add instance as client to keycloak
+CLIENT_URL="${KC_HOST}/admin/realms/master/clients"
+curl -s -X POST -H "${AUTH}"  -H 'content-type: application/json' ${CLIENT_URL} -d "${JSON}"
+

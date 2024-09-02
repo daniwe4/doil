@@ -30,6 +30,7 @@ php8.3:
       - php8.3-opcache
       - php8.3-readline
       - php8.3-soap
+      - php8.3-sqlite3
       - php8.3-xml
       - php8.3-xmlrpc
       - php8.3-xsl
@@ -55,6 +56,7 @@ php{{ version }}:
           - php{{ version }}-opcache
           - php{{ version }}-readline
           - php{{ version }}-soap
+          - php{{ version }}-sqlite3
           - php{{ version }}-xml
           - php{{ version }}-xmlrpc
           - php{{ version }}-xsl
