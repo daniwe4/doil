@@ -65,7 +65,8 @@ fi
 doil_status_okay
 
 doil_status_send_message "Creating mandatory folder"
-doil_system_create_folder
+GLOBAL_INSTANCES_PATH=$(grep "global_instances_path" "${SCRIPT_DIR}"/conf/doil.conf | cut -d '=' -f 2-)
+doil_system_create_folder "${GLOBAL_INSTANCES_PATH}"
 if [[ $? -ne 0 ]]
 then
   doil_status_failed
@@ -74,7 +75,7 @@ fi
 doil_status_okay
 
 doil_status_send_message "Setting up basic configuration"
-doil_system_setup_config
+doil_system_setup_config "true"
 if [[ $? -ne 0 ]]
 then
   doil_status_failed
@@ -82,10 +83,8 @@ then
 fi
 doil_status_okay
 
-ENABLE_KEYCLOAK=$(doil_get_conf enable_keycloak)
-
 doil_status_send_message "Copy doil system"
-doil_system_copy_doil "$ENABLE_KEYCLOAK"
+doil_system_copy_doil
 if [[ $? -ne 0 ]]
 then
   doil_status_failed
@@ -150,8 +149,10 @@ then
   doil_system_install_proxyserver
   doil_status_okay
 
+  KEYCLOAK_ENABLE=$(doil_get_conf "keycloak_enable=")
+
   # start keycloak server
-  if [[ "$ENABLE_KEYCLOAK" == true ]]
+  if [[ "$KEYCLOAK_ENABLE" == true ]]
   then
     doil_status_send_message "Installing keycloak server"
     doil_system_install_keycloakserver

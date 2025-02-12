@@ -68,7 +68,7 @@ function doil_system_remove() {
 
   if [ ! -z ${ALL} ]
   then
-    GLOBAL_INSTANCES_PATH=$(doil_get_conf global_instances_path)
+    GLOBAL_INSTANCES_PATH=$(doil_get_conf "global_instances_path=")
     if [ -d "${GLOBAL_INSTANCES_PATH}" ]
     then
       rm -rf "${GLOBAL_INSTANCES_PATH}"
@@ -166,7 +166,7 @@ function doil_system_add_user_to_doil_group() {
 }
 
 function doil_system_create_folder() {
-  GLOBAL_INSTANCES_PATH=$(cat ${SCRIPT_DIR}/conf/doil.conf | grep "global_instances_path" | cut -d '=' -f 2-)
+  GLOBAL_INSTANCES_PATH="${1}"
   if [ ! -d "${GLOBAL_INSTANCES_PATH}" ]
   then
     mkdir -p "${GLOBAL_INSTANCES_PATH}"
@@ -206,18 +206,8 @@ function doil_system_create_folder() {
 }
 
 function doil_system_copy_doil() {
-  enable_keycloak="$1"
-  if [[ "$enable_keycloak" == true ]]
-  then
-    cp -r ${SCRIPT_DIR}/templates/keycloak /usr/local/lib/doil/server/
-  else
-    if [ -d /usr/local/lib/doil/server/keycloak ]
-    then
-      rm -rf /usr/local/lib/doil/server/keycloak
-    fi
-  fi
-
   cp ${SCRIPT_DIR}/doil.sh /usr/local/bin/doil
+  cp -r ${SCRIPT_DIR}/templates/keycloak /usr/local/lib/doil/server/
   cp -r ${SCRIPT_DIR}/templates/mail /usr/local/lib/doil/server/
   cp -r ${SCRIPT_DIR}/templates/proxy /usr/local/lib/doil/server/
   cp -r ${SCRIPT_DIR}/templates/salt /usr/local/lib/doil/server/
@@ -231,21 +221,25 @@ function doil_system_copy_doil() {
 }
 
 function doil_system_setup_config() {
+  WITH_BASE_CONFIG="${1}"
 
-  cp ${SCRIPT_DIR}/conf/doil.conf /etc/doil/doil.conf
+  if [ "${WITH_BASE_CONFIG}" == "true" ]
+  then
+    cp ${SCRIPT_DIR}/conf/doil.conf /etc/doil/doil.conf
+  fi
+  cp /etc/doil/doil.conf /usr/local/share/doil/.doil.conf
 
   if [ ! -f /etc/doil/repositories.json ]
   then
     touch /etc/doil/repositories.json
+    # add ilias repo as default
+    echo '"a:1:{i:1;O:27:\"CaT\\Doil\\Commands\\Repo\\Repo\":3:{s:7:\"\u0000*\u0000name\";s:5:\"ilias\";s:6:\"\u0000*\u0000url\";s:44:\"https://github.com/ILIAS-eLearning/ILIAS.git\";s:9:\"\u0000*\u0000global\";b:1;}}"' > "/etc/doil/repositories.json"
   fi
 
   if [ ! -f /etc/doil/user.json ]
   then
     touch /etc/doil/user.json
   fi
-
-  # ilias repo
-  echo '"a:1:{i:1;O:27:\"CaT\\Doil\\Commands\\Repo\\Repo\":3:{s:7:\"\u0000*\u0000name\";s:5:\"ilias\";s:6:\"\u0000*\u0000url\";s:44:\"https://github.com/ILIAS-eLearning/ILIAS.git\";s:9:\"\u0000*\u0000global\";b:1;}}"' > "/etc/doil/repositories.json"
 
   chown -R root:doil /etc/doil
 
@@ -264,7 +258,7 @@ function doil_system_setup_ip() {
 }
 
 function doil_system_setup_access() {
-  GLOBAL_INSTANCES_PATH=$(cat ${SCRIPT_DIR}/conf/doil.conf | grep "global_instances_path" | cut -d '=' -f 2-)
+  GLOBAL_INSTANCES_PATH=$(doil_get_conf "global_instances_path=")
 
   chown -R root:doil "${GLOBAL_INSTANCES_PATH}"
   chown -R root:doil /usr/local/lib/doil
@@ -368,13 +362,20 @@ function doil_system_install_saltserver() {
 function doil_system_install_keycloakserver() {
   cd /usr/local/lib/doil/server/keycloak
 
-  KEYCLOAK_HOSTNAME=$(printf '%s\n' "$(doil_get_conf keycloak_hostname)" | sed -e 's/[\/&]/\\&/g')
-  KEYCLOAK_NEW_ADMIN_PASSWORD=$(doil_get_conf keycloak_new_admin_password)
-  KEYCLOAK_OLD_ADMIN_PASSWORD=$(doil_get_conf keycloak_old_admin_password)
+  KEYCLOAK_HTTPS=$(doil_get_conf "keycloak_https=");
+  HTTP_SCHEME="http://"
+  if [ "${KEYCLOAK_HTTPS}" == "true" ]
+  then
+    HTTP_SCHEME="https://"
+  fi
+  HOST=$(doil_get_conf 'host=')
+  KEYCLOAK_HOSTNAME=$(printf '%s\n' "${HTTP_SCHEME}${HOST}/keycloak" | sed -e 's/[\/&]/\\&/g')
+  KEYCLOAK_NEW_ADMIN_PASSWORD=$(doil_get_conf "keycloak_admin_password=")
+  KEYCLOAK_OLD_ADMIN_PASSWORD="admin"
   # Please leave this in as an example for default user creation
   # KEYCLOAK_USR_PASSWORD=$(doil_get_conf keycloak_usr_password)
-  KEYCLOAK_DB_USERNAME=$(doil_get_conf keycloak_db_username)
-  KEYCLOAK_DB_PASSWORD=$(doil_get_conf keycloak_db_password)
+  KEYCLOAK_DB_USERNAME=$(doil_get_conf "keycloak_db_username=")
+  KEYCLOAK_DB_PASSWORD=$(doil_get_conf "keycloak_db_password=")
 
   sed -i "s/%TPL_SERVER_HOSTNAME%/${KEYCLOAK_HOSTNAME}/g" "/usr/local/lib/doil/server/keycloak/conf/keycloak-startup.conf"
   sed -i "s/%TPL_DB_USERNAME%/${KEYCLOAK_DB_USERNAME}/g" "/usr/local/lib/doil/server/keycloak/conf/keycloak-startup.conf"
@@ -415,7 +416,7 @@ function doil_system_install_mailserver() {
   BUILD=$(docker compose up -d 2>&1 > /var/log/doil/stream.log) 2>&1 > /var/log/doil/stream.log
   sleep 20
   docker exec -i doil_saltmain bash -c "salt 'doil.mail' state.highstate saltenv=mailservices" 2>&1 > /var/log/doil/stream.log
-  PASSWORD=$(doil_get_conf mail_password)
+  PASSWORD=$(doil_get_conf mail_password=)
   if [[ "${PASSWORD}" != "ilias" ]]
   then
     PASSWORD_HASH=$(docker exec -i doil_saltmain bash -c "salt \"doil.mail\" shadow.gen_password \"${PASSWORD}\" --out txt" | cut -d ' ' -f 2-)

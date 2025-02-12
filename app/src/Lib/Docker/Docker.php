@@ -6,7 +6,7 @@ namespace CaT\Doil\Lib\Docker;
 
 interface Docker
 {
-    public function startContainerByDockerCompose(string $path) : void;
+    public function startContainerByDockerCompose(string $path, bool $update_context = false) : void;
     public function stopContainerByDockerCompose(string $path) : void;
     public function ps() : array;
     public function getRunningInstanceNames() : array;
@@ -39,4 +39,5 @@ interface Docker
     public function refreshGrains(string $name) : void;
     public function deleteInstances(array $instances) : void;
     public function pruneNetworks() : void;
+    public function startContainerWithRebuild(string $path) : void;
 }

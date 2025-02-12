@@ -7,7 +7,7 @@ init_keycloak_api:
 
 change_admin_password:
   cmd.run:
-    - name: /opt/keycloak/bin/kcadm.sh set-password -r master --username admin --new-password %TPL_NEW_ADMIN_PASSWORD%
+    - name: /opt/keycloak/bin/kcadm.sh set-password --server http://localhost:8080 -r master --username admin --new-password %TPL_NEW_ADMIN_PASSWORD%
 
 # Please leave this in as an example for default user creation
 # {% if salt["cmd.run"]("/opt/keycloak/bin/kcadm.sh get users -r master -q q=username:doil") == "[ ]" %}

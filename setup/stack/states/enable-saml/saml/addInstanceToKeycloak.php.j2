@@ -14,7 +14,7 @@ function setProtectMetaData(bool $value) : void
     file_put_contents("/var/ilias/data/ilias/auth/saml/config/config.php", $data);
 }
 
-$KC_HOST = "{{ server_host_name }}";
+$KC_HOST = "{{ keycloak_host_name }}";
 
 $ch = curl_init();
 

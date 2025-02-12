@@ -27,11 +27,12 @@ interface Filesystem
     public function unzip(string $from, string $to) : void;
     public function searchForFileRecursive(string $path, string $pattern) : ?string;
     public function replaceStringInFile(string $path, string $needle, string $substitute) : void;
-    public function replaceStringInJsonFile(string $path, array $keys, string $substitute) : void;
-    public function replaceLineInFile(string $path, string $needle, string $substitute) : void;
+    public function replaceStringInJsonFile(string $file_path, array $key_path, string $substitute) : void;
+    public function replaceLineInFile(string $path, string $needle, string $substitute, int $limit = 1) : void;
     public function getLineInFile(string $path, string $needle) : ?string;
     public function saveToJsonFile(string $path, array $objects) : void;
     public function readFromJsonFile(string $path) : array;
     public function grepMysqlPasswordFromFile(string $path) : string;
     public function addToGitConfig(string $path, string $section, string $line) : void;
+    public function iniFileToArray(string $path) : array;
 }

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 update() {
-  ENABLE_KEYCLOAK=$(doil_get_conf enable_keycloak)
+  WITH_BASE_CONFIG="${1}"
+  KEYCLOAK_ENABLE=$(doil_get_conf keycloak_enable=)
 
   doil_status_send_message_nl "Stopping all services"
   doil_system_stop_instances
@@ -16,12 +17,21 @@ update() {
   doil_status_okay
 
   doil_status_send_message "Copying new doil system"
-  doil_system_create_folder
-  doil_system_copy_doil "$ENABLE_KEYCLOAK"
+  doil_system_create_folder "$(doil_get_conf global_instance_path=)"
+  doil_system_copy_doil
   doil_status_okay
 
   doil_status_send_message "Creating log file"
   doil_system_setup_log
+  if [[ $? -ne 0 ]]
+  then
+    doil_status_failed
+    exit
+  fi
+  doil_status_okay
+
+  doil_status_send_message "Copy configuration"
+  doil_system_setup_config "${WITH_BASE_CONFIG}"
   if [[ $? -ne 0 ]]
   then
     doil_status_failed
@@ -52,7 +62,7 @@ update() {
 
   doil_status_send_message "Copying new doil system"
   doil_system_create_folder
-  doil_system_copy_doil "$ENABLE_KEYCLOAK"
+  doil_system_copy_doil
   doil_status_okay
 
   doil_status_send_message "Adding safe git dir for user"
@@ -91,12 +101,12 @@ update() {
   doil_status_okay
 
   # start keycloak server
-  if [[ "$ENABLE_KEYCLOAK" == true ]]
-  then
-    doil_status_send_message "Reinstalling keycloak server"
-    doil_system_install_keycloakserver
-    doil_status_okay
-  fi
+#  if [[ "$KEYCLOAK_ENABLE" == true ]]
+#  then
+#    doil_status_send_message "Reinstalling keycloak server"
+#    doil_system_install_keycloakserver
+#    doil_status_okay
+#  fi
 
   doil_status_send_message "Reinstalling proxy service"
   doil_system_install_proxyserver

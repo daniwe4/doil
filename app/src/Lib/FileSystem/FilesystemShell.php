@@ -176,9 +176,9 @@ class FilesystemShell implements Filesystem
         file_put_contents($path, implode("", $data));
     }
 
-    public function replaceLineInFile(string $path, string $needle, string $substitute) : void
+    public function replaceLineInFile(string $path, string $needle, string $substitute, int $limit = 1) : void
     {
-        $text = preg_replace($needle, $substitute, file_get_contents($path), 1, $count);
+        $text = preg_replace($needle, $substitute, file_get_contents($path), $limit, $count);
 
         if ($count) {
             file_put_contents($path, $text);
@@ -246,5 +246,21 @@ class FilesystemShell implements Filesystem
 
         $this->symfony_file_system->appendToFile($path, "[$section]\n");
         $this->symfony_file_system->appendToFile($path, "\t" . $line . "\n");
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function iniFileToArray(string $path) : array
+    {
+        if (! file_exists($path)) {
+            throw new \Exception("File $path does not exist.");
+        }
+
+        $result = parse_ini_file($path, true, INI_SCANNER_TYPED);
+        if (! is_array($result)) {
+            throw new \Exception("Cant parse ini file: $path");
+        }
+        return $result;
     }
 }

@@ -392,9 +392,9 @@ under setup/conf/doil.conf. The adjustments must be made before an update/instal
 
 The following settings are available:
 
-* `enable_keycloak=[true/false]`  decides whether keycloak is installed during 
+* `keycloak_enable=[true/false]`  decides whether keycloak is installed during
 an update/install [default:false]
-* `keycloak_hostname=http://doil/keycloak` keycloak url, please pay attention to https/http
+* `keycloak_https=[true/false]` use https = true else false
 * `keycloak_new_admin_password=12345` admin password
 * `keycloak_old_admin_password=admin` If the password is changed during an update, the old 
 password must be entered here. Please make sure to adjust it after the update. For the first

@@ -16,9 +16,9 @@
 doil_get_conf() {
   CONFIG=${1}
   VALUE=""
-  if [ -f /etc/doil/doil.conf ]
+  if [ -f /usr/local/share/doil/.doil.conf ]
   then
-    VALUE=$(cat /etc/doil/doil.conf | grep ${CONFIG} | cut -d '=' -f 2-)
+    VALUE=$(cat /usr/local/share/doil/.doil.conf | grep ${CONFIG} | cut -d '=' -f 2-)
   fi
   echo ${VALUE}
 }

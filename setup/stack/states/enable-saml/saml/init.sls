@@ -54,13 +54,13 @@ install_certs:
   file.managed:
     - source: salt://saml/SetIdp.php.j2
     - template: jinja
-    - context:
-      ilias_http_path: {{ doil_domain }}
-      idp_meta: %TPL_IDP_META%
-      keycloak_host_name: %TPL_KEYCLOAK_HOSTNAME%
     - user: root
     - group: root
     - mode: 644
+    - context:
+      ilias_http_path: {{ doil_domain }}
+      keycloak_host_name: %TPL_KEYCLOAK_HOSTNAME%
+      idp_meta: %TPL_IDP_META%
 
 init_ilias_idp_lt10:
   cmd.run:
@@ -73,13 +73,13 @@ init_ilias_idp_lt10:
   file.managed:
     - source: salt://saml/SetIdpV10.php.j2
     - template: jinja
-    - context:
-      ilias_http_path: {{ doil_domain }}
-      idp_meta: %TPL_IDP_META%
-      keycloak_host_name: %TPL_KEYCLOAK_HOSTNAME%
     - user: root
     - group: root
     - mode: 644
+    - context:
+      ilias_http_path: {{ doil_domain }}
+      keycloak_host_name: %TPL_KEYCLOAK_HOSTNAME%
+      idp_meta: %TPL_IDP_META%
 
 init_ilias_idp:
   cmd.run:
@@ -94,7 +94,7 @@ init_ilias_idp:
     - source: salt://saml/addInstanceToKeycloak.php.j2
     - template: jinja
     - context:
-      server_host_name: %TPL_KEYCLOAK_HOSTNAME%
+      keycloak_host_name: %TPL_KEYCLOAK_HOSTNAME%
       admin_password: %TPL_ADMIN_PASSWORD%
       meta_url: {{ doil_domain }}{{ meta_url }}
     - user: root

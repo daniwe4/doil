@@ -57,7 +57,7 @@ delete_ilias_idp:
     - source: salt://saml/deleteInstanceFromKeycloak.php.j2
     - template: jinja
     - context:
-      server_host_name: %TPL_KEYCLOAK_HOSTNAME%
+      keycloak_host_name: %TPL_KEYCLOAK_HOSTNAME%
       admin_password: %TPL_ADMIN_PASSWORD%
       doil_domain: {{ doil_domain }}
     - user: root

@@ -32,9 +32,9 @@ class DockerShell implements Docker
         self::KEYCLOAK
     ];
 
-    public function startContainerByDockerCompose(string $path) : void
+    public function startContainerByDockerCompose(string $path, bool $update_context = false) : void
     {
-        $this->startDoilSystemsIfNeeded();
+        $this->startDoilSystemsIfNeeded($update_context);
 
         if ($path == self::PROXY) {
             $this->populateProxy();
@@ -525,13 +525,10 @@ class DockerShell implements Docker
     public function deleteInstances(array $instances) : void
     {
         foreach ($instances as $instance) {
-            $image = $this->getImageNameByInstance($instance);
             $this->kill($instance);
             sleep(2);
             $this->removeContainer($instance);
             sleep(2);
-
-            $this->removeImage($image);
         }
     }
 
@@ -546,6 +543,25 @@ class DockerShell implements Docker
 
         $logger = $this->logger->getDoilLogger("DOCKER");
         $logger->info("Prune network");
+        $this->run($cmd, $logger);
+    }
+
+    public function startContainerWithRebuild(string $path) : void
+    {
+        $cmd = [
+            "docker",
+            "compose",
+            "-f",
+            $path . "/docker-compose.yml",
+            "up",
+            "-d",
+            "--force-recreate",
+            "--no-deps",
+            "--build"
+        ];
+
+        $logger = $this->logger->getDoilLogger(pathinfo($path, PATHINFO_FILENAME));
+        $logger->info("Start instance with rebuild");
         $this->run($cmd, $logger);
     }
 
@@ -574,12 +590,16 @@ class DockerShell implements Docker
         $this->run($cmd, $logger);
     }
 
-    protected function startDoilSystemsIfNeeded() : void
+    protected function startDoilSystemsIfNeeded(bool $update_context) : void
     {
         if (! $this->isInstanceUp(self::SALT)) {
             $this->startContainerByDockerComposeWithForceRecreate(self::SALT);
         }
-        if ($this->filesystem->exists(self::KEYCLOAK . "/docker-compose.yml") && ! $this->isInstanceUp(self::KEYCLOAK)) {
+        if (
+            $this->filesystem->exists(self::KEYCLOAK . "/docker-compose.yml") &&
+            ! $this->isInstanceUp(self::KEYCLOAK) &&
+            ! $update_context
+        ) {
             $this->startContainerByDockerComposeWithForceRecreate(self::KEYCLOAK);
         }
         if (! $this->isInstanceUp(self::PROXY)) {

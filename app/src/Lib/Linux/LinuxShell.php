@@ -45,6 +45,16 @@ class LinuxShell implements Linux
         $this->run($cmd, $this->logger);
     }
 
+    public function addGroup(string $name) : void
+    {
+        $cmd = [
+            "groupadd",
+            $name
+        ];
+        $this->logger->info("Add group '$name'");
+        $this->run($cmd, $this->logger);
+    }
+
     public function deleteGroup(string $name) : void
     {
         $cmd = [
@@ -54,5 +64,23 @@ class LinuxShell implements Linux
 
         $this->logger->info("Delete group '$name'");
         $this->run($cmd, $this->logger);
+    }
+
+    public function groupExists(string $name) : bool
+    {
+        $cmd = [
+            "grep",
+            "-E",
+            "^" . $name . ":",
+            "/etc/group"
+        ];
+
+        $this->logger->info("Get group '$name'");
+        try {
+            $this->run($cmd, $this->logger);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 }

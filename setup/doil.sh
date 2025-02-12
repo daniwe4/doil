@@ -52,7 +52,7 @@ then
   MAP_USER="--user $(id -u):$(id -g)"
 fi
 
-GLOBAL_INSTANCES_PATH=$(doil_get_conf global_instances_path)
+GLOBAL_INSTANCES_PATH=$(doil_get_conf "global_instances_path=")
 if [ -z $GLOBAL_INSTANCES_PATH ]
 then
   GLOBAL_INSTANCES_PATH=""

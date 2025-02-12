@@ -10,15 +10,19 @@ use CaT\Doil\Commands\Pack;
 use CaT\Doil\Commands\Salt;
 use CaT\Doil\Commands\User;
 use CaT\Doil\Commands\Proxy;
+use CaT\Doil\Commands\Config;
 use CaT\Doil\Lib\Git\GitShell;
 use CaT\Doil\Lib\ProjectConfig;
 use CaT\Doil\Commands\Keycloak;
+use CaT\Doil\Lib\Config\Domain;
 use CaT\Doil\Commands\Instances;
 use CaT\Doil\Lib\ILIAS\IliasInfo;
 use CaT\Doil\Lib\Posix\PosixShell;
 use CaT\Doil\Lib\Linux\LinuxShell;
 use CaT\Doil\Lib\Docker\DockerShell;
 use CaT\Doil\Lib\Logger\LoggerFactory;
+use CaT\Doil\Lib\Config\ConfigManager;
+use CaT\Doil\Lib\Config\Keycloak as ConfigKeycloak;
 use CaT\Doil\Commands\Repo\RepoManager;
 use CaT\Doil\Lib\FileSystem\FilesystemShell;
 use CaT\Doil\Lib\ConsoleOutput\CommandWriter;
@@ -35,6 +39,9 @@ function buildContainerForApp() : Container
 
     $c["app"] = function($c) {
         return new App(
+            $c["command.config.edit"],
+            $c["command.config.list"],
+            $c["command.config.update"],
             $c["command.instances.apply"],
             $c["command.instances.create"],
             $c["command.instances.csp"],
@@ -146,6 +153,60 @@ function buildContainerForApp() : Container
 
     $c["project.config"] = function() {
         return new ProjectConfig();
+    };
+
+    $c["config.manager"] = function($c) {
+        return new ConfigManager(
+            $c["filesystem.shell"],
+            $c["linux.shell"],
+            $c["logger"],
+            $c["docker.shell"],
+            $c["config.keycloak"],
+            $c["config.domain"]
+        );
+    };
+
+    $c["config.keycloak"] = function($c) {
+        return new ConfigKeycloak(
+            $c["filesystem.shell"],
+            $c["linux.shell"],
+            $c["command.writer"],
+            $c["docker.shell"]
+        );
+    };
+
+    $c["config.domain"] = function($c) {
+        return new Domain(
+            $c["filesystem.shell"],
+            $c["linux.shell"],
+            $c["command.writer"],
+            $c["docker.shell"],
+            $c["posix.shell"]
+        );
+    };
+
+    $c["command.config.edit"] = function($c) {
+        return new Config\EditCommand(
+            $c["posix.shell"],
+            $c["config.manager"],
+            $c["command.writer"]
+        );
+    };
+
+    $c["command.config.list"] = function($c) {
+        return new Config\ListCommand(
+            $c["posix.shell"],
+            $c["config.manager"],
+            $c["command.writer"]
+        );
+    };
+
+    $c["command.config.update"] = function($c) {
+        return new Config\UpdateCommand(
+            $c["posix.shell"],
+            $c["config.manager"],
+            $c["command.writer"]
+        );
     };
 
     $c["command.instances.apply"] = function($c) {
