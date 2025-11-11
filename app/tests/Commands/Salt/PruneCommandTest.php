@@ -30,7 +30,7 @@ class PruneCommandTest extends TestCase
         $docker
             ->expects($this->once())
             ->method("executeCommand")
-            ->with("/usr/local/lib/doil/server/salt", "doil_saltmain", "salt-key", "-y", "-D")
+            ->with("/usr/local/lib/doil/server/salt", "doil_salt", "salt-key", "-y", "-D")
         ;
 
         $execute_result = $tester->execute([]);

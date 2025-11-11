@@ -36,7 +36,7 @@ class StatusCommand extends Command
                 strstr($a, "CONTAINER ID") ||
                 strstr($a, "doil_mail") ||
                 strstr($a, "doil_proxy") ||
-                strstr($a, "doil_saltmain") ||
+                strstr($a, "doil_salt") ||
                 strstr($a, "doil_keycloak") ||
                 strstr($a, "_local") ||
                 strstr($a, "_global")

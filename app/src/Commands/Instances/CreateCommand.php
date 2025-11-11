@@ -33,6 +33,7 @@ class CreateCommand extends Command implements SignalableCommandInterface
     protected const GLOBAL_REPO_PATH = "/usr/local/share/doil/repositories";
     protected const LOCAL_INSTANCES_PATH = "/.doil/instances";
     protected const GLOBAL_INSTANCES_PATH = "/usr/local/share/doil/instances";
+    protected const USER_GLOBAL_INSTANCES_PATH = "/srv/instances";
     protected const KEYCLOAK_PATH = "/usr/local/lib/doil/server/keycloak";
     protected const BASIC_FOLDERS = [
         "/conf",
@@ -375,7 +376,7 @@ class CreateCommand extends Command implements SignalableCommandInterface
         sleep(1);
         $this->docker->setGrain($instance_salt_name, "ilias_version", $ilias_version);
         sleep(1);
-        $this->docker->executeDockerCommand("doil_saltmain", "salt \"" . $instance_salt_name . "\" saltutil.refresh_grains");
+        $this->docker->executeDockerCommand("doil_salt", "salt \"" . $instance_salt_name . "\" saltutil.refresh_grains");
         $this->writer->endBlock();
 
         $this->docker->executeDockerCommand($instance_name, "git config --global --add safe.directory \"*\"");
@@ -707,11 +708,7 @@ class CreateCommand extends Command implements SignalableCommandInterface
         $options["global"] = $global;
 
         if ($global) {
-            $target = explode("=", $this->filesystem->getLineInFile("/etc/doil/doil.conf", "global_instances_path=") ?? "")[1];
-            if (! $target) {
-                $target = "";
-            }
-            call_user_func($this->checkGlobalTarget(), $target);
+            $target = self::USER_GLOBAL_INSTANCES_PATH;
         }
 
         // Skip readme
@@ -794,17 +791,6 @@ class CreateCommand extends Command implements SignalableCommandInterface
                 throw new RuntimeException("the path '$t' is not writeable!");
             }
             return $t;
-        };
-    }
-    protected function checkGlobalTarget() : Closure
-    {
-        return function(string $t) {
-            if (is_null($t) || $t == "") {
-                throw new RuntimeException("Missing config entry 'global_instances_path'. Please add this entry to /etc/doil/doil.conf to create global instances.");
-            }
-            if (stristr($t, "/home/") !== false) {
-                throw new RuntimeException("Global instances must not be created below /home directory. Please change the entry in /etc/doil/doil.conf.");
-            }
         };
     }
 

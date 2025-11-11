@@ -32,7 +32,7 @@ class LoginCommand extends Command
             $this->docker->startContainerByDockerCompose(self::SALT_PATH);
         }
 
-        $this->docker->loginIntoContainer(self::SALT_PATH, "doil_saltmain");
+        $this->docker->loginIntoContainer(self::SALT_PATH, "doil_salt");
         return Command::SUCCESS;
     }
 }

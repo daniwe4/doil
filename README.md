@@ -12,8 +12,6 @@ all mails from your instances, so you can test the ILIAS emailing.
 1. cd into the unpacked directory
 1. if you run doil on a remote host ensure to change the host name in `setup/conf/doil.conf` to your host name
 1. adjust your mail password in `setup/conf/doil.conf`
-1. if you run global instances make sure to adjust 'global_instances_path' in `setup/conf/doil.conf` to specify
-   where to place them, default is '/srv/instances'. Attention, paths with 'home' are not allowed here.
 1. execute `sudo ./setup/install.sh` in order to install **doil**
 1. you can remove the downloaded folder afterwards
 1. check `doil help` for available commands and further instructions
@@ -40,9 +38,6 @@ Otherwise, use the update script.
 
 1. checkout the newest master branch or copy and extract the zip
 2. cd into the unpacked directory
-3. if you run global instances make sure to adjust 'global_instances_path' in `setup/conf/doil.conf` to specify 
-where to place them, default is '/srv/instances'. Attention, paths with 'home' are not allowed here. The update
-will move all global instances to the set path.
 4. execute sudo ./setup/update.sh in order to update **doil**
 5. you can remove the downloaded folder afterward
 
@@ -296,7 +291,7 @@ the folder easily clone it again from [doil](https://github.com/conceptsandtrain
 
 Cd into the cloned folder and execute the script.
 
-`sudo ./setup/uninstall.sh`
+`sudo ./setup/uninstall`
 
 The script will ask you if you want to remove **doil** completely from your system or if you
 want to keep your instances, images ...

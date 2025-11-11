@@ -36,7 +36,7 @@ class PruneCommand extends Command
         }
 
         $this->writer->beginBlock($output, "Prune salt main");
-        $this->docker->executeCommand(self::SALT_PATH, "doil_saltmain", "salt-key", "-y", "-D");
+        $this->docker->executeCommand(self::SALT_PATH, "doil_salt", "salt-key", "-y", "-D");
         $this->writer->endBlock();
 
         return Command::SUCCESS;
