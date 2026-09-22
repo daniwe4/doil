@@ -41,6 +41,7 @@ class ConfigReader
             ->withKeycloakDbUsername($ini["keycloak_db_username"])
             ->withKeycloakDbPassword($ini["keycloak_db_password"])
             ->withUpdateToken($ini["update_token"])
+            ->withOfficeEnabled($ini["office_enabled"])
             ->withGitPrivateSSHKeyPath($ini["git_private_ssh_key_path"])
             ->withGitPublicSSHKeyPath($ini["git_public_ssh_key_path"])
         ;

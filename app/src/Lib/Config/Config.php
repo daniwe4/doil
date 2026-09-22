@@ -20,6 +20,7 @@ class Config
         protected string $keycloak_db_username = "admin",
         protected string $keycloak_db_password = "admin",
         protected string $update_token = "",
+        protected bool $office_enabled = false,
         protected string $git_private_ssh_key_path = "",
         protected string $git_public_ssh_key_path = "",
     ) {}
@@ -156,6 +157,18 @@ class Config
         return $clone;
     }
 
+    public function isOfficeEnabled() : bool
+    {
+        return $this->office_enabled;
+    }
+
+    public function withOfficeEnabled(bool $office_enabled) : Config
+    {
+        $clone = clone $this;
+        $clone->office_enabled = $office_enabled;
+        return $clone;
+    }
+
     public function getGitPrivateSSHKeyPath() : string
     {
         return $this->git_private_ssh_key_path;
@@ -185,6 +198,7 @@ class Config
         $allowed_hosts = implode(",", $this->allowed_hosts);
         $https_proxy = var_export($this->https_proxy, true);
         $keycloak_enabled = var_export($this->keycloak_enabled, true);
+        $office_enabled = var_export($this->office_enabled, true);
 
         return <<<DOC
 host=$this->host
@@ -198,6 +212,7 @@ keycloak_old_admin_password=$this->keycloak_old_admin_password
 keycloak_db_username=$this->keycloak_db_username
 keycloak_db_password=$this->keycloak_db_password
 update_token=$this->update_token
+office_enabled=$office_enabled
 git_private_ssh_key_path=$this->git_private_ssh_key_path
 git_public_ssh_key_path=$this->git_public_ssh_key_path
 DOC;

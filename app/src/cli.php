@@ -90,6 +90,7 @@ function buildContainerForApp(string $script_dir = "", string $home_dir = "", st
             $c["setup.proxy"],
             $c["setup.mail"],
             $c["setup.keycloak"],
+            $c["setup.office"],
         );
     };
 
@@ -172,6 +173,10 @@ function buildContainerForApp(string $script_dir = "", string $home_dir = "", st
         return new CaT\Doil\Setup\Server\Keycloak(
             $c["filesystem.shell"]
         );
+    };
+
+    $c["setup.office"] = function($c) {
+        return new CaT\Doil\Setup\Server\Office();
     };
 
 

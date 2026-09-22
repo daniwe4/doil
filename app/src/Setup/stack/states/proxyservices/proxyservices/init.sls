@@ -24,8 +24,14 @@ proxyservice_packages:
   file.managed:
     - source: salt://proxyservices/sv-nginx.conf
 
-nginx_supervisor_signal:
-  supervisord.running:
-    - name: nginx
+nginx_supervisor_reread:
+  cmd.run:
+    - name: supervisorctl reread
     - watch:
       - file: /etc/supervisor/conf.d/nginx.conf
+
+nginx_supervisor_update:
+  cmd.run:
+    - name: supervisorctl update
+    - watch:
+        - cmd: nginx_supervisor_reread

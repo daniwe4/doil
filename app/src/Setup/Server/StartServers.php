@@ -17,6 +17,7 @@ class StartServers
         protected Proxy $proxy,
         protected Mail $mail,
         protected Keycloak $keycloak,
+        protected Office $office
     ) {}
 
     /**
@@ -36,6 +37,11 @@ class StartServers
             $this->keycloak->start($logger, $config);
             $this->keycloak->commit($logger);
             $this->keycloak->distributeData($logger, $config);
+        }
+
+        if ($config->isOfficeEnabled()) {
+            $this->office->start($logger);
+            $this->office->commit($logger);
         }
     }
 }

@@ -61,6 +61,10 @@ class ConfigChecker
             throw new \InvalidArgumentException('UpdateToken must be a string.');
         }
 
+        if (!is_bool($config->isOfficeEnabled())) {
+            throw new \InvalidArgumentException('OfficeEnabled must be a boolean.');
+        }
+
         if ($config->getGitPrivateSSHKeyPath() == '') {
             throw new \InvalidArgumentException('GitPrivateSSHKeyPath cannot be empty.');
         }

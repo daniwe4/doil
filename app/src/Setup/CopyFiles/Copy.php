@@ -38,6 +38,12 @@ class Copy
                 "/usr/local/lib/doil/server/keycloak"
             );
         }
+        if ($config->isOfficeEnabled()) {
+            $this->fileSystemShell->copyDirectory(
+                $base_path . "/app/src/Setup/templates/office",
+                "/usr/local/lib/doil/server/office"
+            );
+        }
         foreach (self::SERVER as $server) {
             $this->fileSystemShell->copyDirectory(
                 $base_path . "/app/src/Setup/templates/$server",

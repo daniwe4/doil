@@ -15,8 +15,6 @@ class App extends Application
     {
         parent::__construct(self::NAME);
 
-        foreach ($commands as $command) {
-            $this->addCommand($command);
-        }
+        $this->addCommands($commands);
     }
 }

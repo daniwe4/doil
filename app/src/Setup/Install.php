@@ -59,14 +59,14 @@ class Install
 
             $question = new ConfirmationQuestion(
                 "\n\tdoil adds a config at /etc/doil/doil.conf.
-                 \n\tPlease adjust this file to your needs.
-                 \n\tAt least you have to add the paths for your ssh keys.
-                 \n\tOtherwise the setup won't continue.
-                 \n\n\tIf you want to run Doil as a multi-user system, the SSH keys must be stored in a Doil folder. Follow these steps:
-                 \n\t- sudo mkdir -p /usr/local/share/doil/.ssh
-                 \n\t- ssh-keygen -t ed25519
-                 \n\t  - /usr/local/share/doil/.ssh/id_ed25519 as target
-                 \n\t- sudo chown -R root:doil /usr/local/share/doil/.ssh
+                 \tPlease adjust this file to your needs.
+                 \tAt least you have to add the paths for your ssh keys.
+                 \tOtherwise the setup won't continue.
+                 \n\tIf you want to run Doil as a multi-user system, the SSH keys must be stored in a Doil folder. Follow these steps:
+                 \t- sudo mkdir -p /usr/local/share/doil/.ssh
+                 \t- ssh-keygen -t ed25519
+                 \t- /usr/local/share/doil/.ssh/id_ed25519 as target
+                 \t- sudo chown -R root:doil /usr/local/share/doil/.ssh
                  \n\tAdd the paths for your ssh keys to /etc/doil/doil.conf.
                  \n\n\tContinue? [Yn]: ",
                 true
